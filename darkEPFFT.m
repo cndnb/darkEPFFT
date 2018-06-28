@@ -1,8 +1,9 @@
-function [A,B] = darkEPFFT(data)
+function [A,B,t] = darkEPFFT(data)
 	%Checks that the input matrix has the correct size and is not complex
+	divLength = 4096; %Optimized for FFT computation
 	for count = 1:rows(data)
-		assert(rows(data{count,1}) == 4096, 'data must be 2^N (4096) length');
-		assert(imag(data{count,1}) == 0,'data must be real')
+		assert(rows(data{count,1}) == divLength,char('Data must have length',num2str(divLength)));
+		assert(imag(data{count,1}) == zeros(rows(data{count,1}),1),'data must be real')
 	endfor
 	
 	%Finds the collection inteval for the discrete fourier transform
@@ -13,9 +14,14 @@ function [A,B] = darkEPFFT(data)
 	for count = 1:rows(data)
 		collectArray(:,count) = data{count,1}(:,2);
 	endfor
-	
+
+	constLinearRmX = [ones(divLength,1),(1:divLength)'];
+	[cLRB,clRS,clRR,clRErr,clRCov] = ols2(collectArray,constLinearRmX);
+	driftFix = collectArray .- constLinearRmX*cLRB;
+
 	%Calculates fft for each chunk simultaneously
-	compOut = fft(collectArray);
+	compOut = fft(driftFix); %(Removed drift)
+	%compOut = fft(collectArray); %(No drift fix)
 	%Creates frequency array for only 0 to 1/(2*interval) frequencies
 	fSeries = ((0:rows(compOut)/2)')./(rows(compOut)*interval);
 	%Checks that array is symmetric about the nyquist frequency
@@ -28,5 +34,6 @@ function [A,B] = darkEPFFT(data)
 	%Prepares output arrays
 	A = [fSeries,real(compOut)]; %Cosine components of FFT (columns correspond to hours)
 	B = [fSeries,imag(compOut)]; %Sine components of FFT (columns correspond to hours)
+	t = cell2mat(data(:,2));
 endfunction
 		

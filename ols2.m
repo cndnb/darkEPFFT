@@ -103,7 +103,12 @@ function [BETA, SIGMA, R, ERR, COV] = ols2 (Y, X)
   endif
 
   R = Y - X * BETA;
-  SIGMA = R' * R / (nr - r);
-  ERR = sqrt(diag(COV)*SIGMA);
+  preR = R' * R;
+  if (size(preR) != [1,1])
+    SIGMA = diag(preR) ./ (nr - r);
+  else  
+    SIGMA = preR / (nr - r);
+  endif
+  ERR = sqrt(diag(COV)*SIGMA');
 
 endfunction
