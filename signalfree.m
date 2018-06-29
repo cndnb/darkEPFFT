@@ -9,7 +9,7 @@ A = 1e-14;
 omegaSearch = 2*pi*5e-3;
 omegaEarth = 2*pi*(1/86164.0916);
 
-finalSignal = A.*sin(omegaSearch.*t);
+finalSignal = zeros(rows(t),1);
 %A.*(sin(omegaSearch.*t).*sin(omegaEarth.*t)+cos(omegaSearch.*t).*sin(omegaEarth.*t));
 %A.*sin(omegaSearch.*t).*sin(omegaEarth.*t)+A.*cos(omegaSearch.*t).*sin(omegaEarth.*t);
 
