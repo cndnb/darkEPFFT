@@ -37,7 +37,6 @@ O = [T(:,1) T(:,2) + AutocollimatorNoise];
 accel = diff(diff(O(:,2)));
 Tor = I*accel + kappa*O(2:end-1,2);
 
-fullLength = rows(O);
 
 %Checks that peaks are at the correct points
 figure(1);
@@ -74,3 +73,5 @@ for count = 1:rows(divHours)
 		divHours(count,:) = [];
 	endif
 endfor
+fullLength = rows(divHours)*fullHour;
+

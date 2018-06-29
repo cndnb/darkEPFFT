@@ -1,4 +1,4 @@
-function [allA,allB] = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLength) %NEEDS TO BE UPDATED%
+function out = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLength) %NEEDS TO BE UPDATED%
 	if (nargin != 6)
 		usage('[bMA,bMB] = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLength);');
 	endif
@@ -21,7 +21,7 @@ function [allA,allB] = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLength) %NEE
 	endfor
 	
 	%Sets up return arrays
-	allA = [freqArray,out(:,:,1)]
-	allB = [freqArray,out(:,:,2)]
+	%allA = [freqArray,out(:,:,1)];
+	%allB = [freqArray,out(:,:,2)];
   
 endfunction
