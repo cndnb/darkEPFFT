@@ -25,11 +25,13 @@ hourLength = 4096;
 fullLength = rows(divHours)*hourLength;
 designColumns = 5;
 numHours = rows(divHours);
-numBlocks = floor(runLength/hourLength) + 1; %Plus one for original frequency to be included
+numBlocks = floor(fullLength/hourLength); 
 if ((!exist('Z'))||(!exist('X')))
 	disp('Calculating Z and X');
 	fflush(stdout);
 	importXCov;
+	disp('done');
+	fflush(stdout);
 endif 
 
 tA = A(:,2:end)';
@@ -39,13 +41,11 @@ for count = 1:columns(tA)
 	Y(:,2*(count-1)+1:2*count) = [tA(:,count),tB(:,count)];
 endfor
 Y = repmat(Y,numBlocks,1);
-disp('done');
-fflush(stdout);
 
 %Fitting using precomputed design matrix to find variations in A,B over time
 disp('OLS fitting each frequency');
 fflush(stdout);
-out = dailyModFit(Y,ZX,numBlocks,designColumns,numHours,fullLength);
+[bMA,bMB] = dailyModFit(Y,ZX,numBlocks,designColumns,numHours,fullLength);
 disp('done');
 disp('Converting time amplitude to torque power');
 fflush(stdout);

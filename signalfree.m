@@ -5,11 +5,11 @@
 t = 1:1e6;t=t';
 
 %Injected signal parameters
-A = 1e-14;
-omegaSearch = 2*pi*5e-3;
+A = 1;
+omegaSearch = 2*pi*5e-2;
 omegaEarth = 2*pi*(1/86164.0916);
 
-finalSignal = zeros(rows(t),1);
+finalSignal = A.*sin(omegaSearch.*t);
 %A.*(sin(omegaSearch.*t).*sin(omegaEarth.*t)+cos(omegaSearch.*t).*sin(omegaEarth.*t));
 %A.*sin(omegaSearch.*t).*sin(omegaEarth.*t)+A.*cos(omegaSearch.*t).*sin(omegaEarth.*t);
 
