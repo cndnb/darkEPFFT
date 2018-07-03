@@ -18,14 +18,6 @@ xlabel('hours');
 ylabel('Frequency (Hz)');
 zlabel('FFT Amplitude');
 
-%Initializing design matrix (very large)
-omegaEarth = 2*pi*(1/86164.0916);
-omegaEarthHr = omegaEarth*3600; %(3600s / 1 hr)
-hourLength = 4096;
-fullLength = rows(divHours)*hourLength;
-designColumns = 5;
-numHours = rows(divHours);
-numBlocks = floor(fullLength/hourLength); 
 if ((!exist('Z'))||(!exist('X')))
 	disp('Calculating Z and X');
 	fflush(stdout);
@@ -45,7 +37,7 @@ Y = repmat(Y,numBlocks,1);
 %Fitting using precomputed design matrix to find variations in A,B over time
 disp('OLS fitting each frequency');
 fflush(stdout);
-[bMA,bMB] = dailyModFit(Y,ZX,numBlocks,designColumns,numHours,fullLength);
+[bMA,bMB,freqArray] = dailyModFit(Y,ZX,numBlocks,designColumns,numHours,fullLength,A(2,1)-A(1,1));
 disp('done');
 disp('Converting time amplitude to torque power');
 fflush(stdout);
