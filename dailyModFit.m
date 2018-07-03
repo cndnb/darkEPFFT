@@ -3,7 +3,7 @@ function [allA,allB,freqArray] = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLe
 		usage('[bMA,bMB] = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLength,freqInterval);');
 	endif
 	
-	freqArray = (0:dataLength)' ./ (dataLength);
+	freqArray = (0:(dataLength/2))' ./ (dataLength);
 	out = ones(rows(freqArray),numDesignCol + 1,2);
 	columns(Y)/2
 	for freqCount = 1:columns(Y)/2

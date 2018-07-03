@@ -28,7 +28,7 @@ endif
 
 tA = A(:,2:end)';
 tB = B(:,2:end)';
-Y = zeros(rows(tA),2*columns(tA));
+Y = zeros(rows(tA),2*columns(tA(:,2:end)));
 for count = 1:columns(tA)
 	Y(:,2*(count-1)+1:2*count) = [tA(:,count),tB(:,count)];
 endfor
