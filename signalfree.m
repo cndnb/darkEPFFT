@@ -43,7 +43,7 @@ figure(1);
 check = psd(t(2:length(t)-1,1),Tor);
 loglog(check(:,1),check(:,2));
 
-fullHour = 4096; %3600 goes from 1:3599, 3601 goes 1:3600
+fullHour = 4096;
 tempO = [O(:,1),O];
 tempO(:,1) = tempO(:,1).-1;
 tempO(:,1) = mod(tempO(:,1),fullHour);

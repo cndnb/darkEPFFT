@@ -1,11 +1,11 @@
 %Initializing design matrix (very large)
 %Initializing important variables
 omegaEarth = 2*pi*(1/86164.0916);
-omegaEarthHr = omegaEarth*3600; %(3600s / 1 hr)
 hourLength = 4096;
-fullLength = rows(divHours)*hourLength;
+omegaEarthHr = omegaEarth*hourLength; %(3600s / 1 division)
 designColumns = 6;
 numHours = rows(divHours);
+fullLength = numHours*hourLength;
 numBlocks = floor(fullLength/hourLength);
 
 %Creating design matrix, Z = X' * X, and precalculating Z * X'
