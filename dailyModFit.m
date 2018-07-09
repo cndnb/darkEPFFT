@@ -1,4 +1,4 @@
-function [allA,allB,freqArray] = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLength,freqInterval)
+function [allA,allB,freqArray] = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLength,freqInterval) %UPDATE%
 	if (nargin != 7)
 		usage('[bMA,bMB] = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLength,freqInterval);');
 	endif

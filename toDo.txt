@@ -1,0 +1,12 @@
+Reformat design matrix so that entire dataset Y = days x frequencies is compared to a matrix that is the fft
+of a unit amplitude specific frequency with interval 1/datalength.
+
+Resize both the data array and the design matrices so they are n x 1 matrices => single scalar amplitude output.
+
+Components to look for are
+sin(wt)
+cos(wt)
+sin(wt)cos(w_e t)
+cos(wt)cos(w_e t)
+
+because perpX and paraX are degenerate.
