@@ -1,4 +1,4 @@
-function [A,B,t] = darkEPFFT(data)
+function [rtn,t] = darkEPFFT(data)
 	%Checks that the input matrix has the correct size and is not complex
 	divLength = 4096; %Optimized for FFT computation
 	for count = 1:rows(data)
@@ -32,9 +32,10 @@ function [A,B,t] = darkEPFFT(data)
 	assert(rows(fSeries), rows(compOut));
 	
 	%Prepares output arrays
-	A = [fSeries,real(compOut)]; %Cosine components of FFT (columns correspond to hours)
-	B = [fSeries,imag(compOut)]; %Sine components of FFT (columns correspond to hours)
-	t = cell2mat(data(:,2));
+	%A = [fSeries,real(compOut)]; %Cosine components of FFT (columns correspond to hours)
+	%B = [fSeries,imag(compOut)]; %Sine components of FFT (columns correspond to hours)
+  rtn = compOut'; %Returns columns as frequencies and rows as hours
+	t = cell2mat(data(:,2)); %Labels hour counter for each row
 endfunction
 
 %!test
@@ -43,8 +44,8 @@ endfunction
 %! data = [t,A.*sin(omega.*t)];
 %! divHours = cell(1,2);
 %! divHours{1,1} = data; divHours{1,2} = 1;
-%! [A,B,t] = darkEPFFT(divHours);
-%! compOut = A(:,2)+i*B(:,2);
+%! [out,t] = darkEPFFT(divHours);
+%! compOut = out';
 %! compOut = [compOut;conj(flip(compOut(2:end-1,:)))];
 %! recoveredTime = ifft(compOut);
-%! assert(abs(real(recoveredTime).-data(:,2)) < 2*eps);		
+%! assert(abs(real(recoveredTime).-data(:,2)) < 4*eps);		

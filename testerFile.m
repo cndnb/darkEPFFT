@@ -2,21 +2,21 @@
 if (!exist('divHours'))
 	error('need data');
 endif
-[A,B,t] = darkEPFFT(divHours);
+[compOut,t] = darkEPFFT(divHours);
 
-figure(1);
-waterfall(t,A(:,1),A(:,2:end));
-title('Cosine amplitude')
-xlabel('hours');
-ylabel('Frequency (Hz)');
-zlabel('FFT Amplitude');
-
-figure(2);
-waterfall(t,B(:,1),B(:,2:end));
-title('Sine amplitude');
-xlabel('hours');
-ylabel('Frequency (Hz)');
-zlabel('FFT Amplitude');
+%figure(1);
+%waterfall(t,A(:,1),A(:,2:end));
+%title('Cosine amplitude')
+%xlabel('hours');
+%ylabel('Frequency (Hz)');
+%zlabel('FFT Amplitude');
+%
+%figure(2);
+%waterfall(t,B(:,1),B(:,2:end));
+%title('Sine amplitude');
+%xlabel('hours');
+%ylabel('Frequency (Hz)');
+%zlabel('FFT Amplitude');
 
 if ((!exist('Z'))||(!exist('X')))
 	disp('Calculating Z and X');
@@ -26,18 +26,10 @@ if ((!exist('Z'))||(!exist('X')))
 	fflush(stdout);
 endif 
 
-tA = A(:,2:end)';
-tB = B(:,2:end)';
-Y = zeros(rows(tA),2*columns(tA(:,2:end)));
-for count = 1:columns(tA)
-	Y(:,2*(count-1)+1:2*count) = [tA(:,count),tB(:,count)];
-endfor
-Y = repmat(Y,numBlocks,1);
-
 %Fitting using precomputed design matrix to find variations in A,B over time
 disp('OLS fitting each frequency');
 fflush(stdout);
-[bMA,bMB,freqArray] = dailyModFit(Y,ZX,numBlocks,designColumns,numHours,fullLength,A(2,1)-A(1,1));
+componentAmp = dailyModFit(compOut,ZX,designColumns,fullLength);
 disp('done');
 disp('Converting time amplitude to torque power');
 fflush(stdout);
