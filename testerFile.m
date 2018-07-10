@@ -29,7 +29,7 @@ endif
 %Fitting using precomputed design matrix to find variations in A,B over time
 disp('OLS fitting each frequency');
 fflush(stdout);
-componentAmp = dailyModFit(compOut,ZX,designColumns,fullLength);
+[bMA,bMB] = dailyModFit(compOut,reZX,imZX,designColumns,fullLength);
 disp('done');
 disp('Converting time amplitude to torque power');
 fflush(stdout);
@@ -38,8 +38,8 @@ disp('done');
 fflush(stdout);
 
 figure(3);
-loglog(pwr(:,1),pwr(:,2),pwr(:,1),pwr(:,3),pwr(:,1),pwr(:,4),pwr(:,1),pwr(:,5));
+loglog(pwr(:,1),pwr(:,2),pwr(:,1),pwr(:,3),pwr(:,1),pwr(:,4));
 title('Torque Power vs. Frequency');
-legend('Z','perpX','paraX','sum');
+legend('Z','planeX','sum');
 xlabel('Frequency (Hz)');
 ylabel('Torque Power');

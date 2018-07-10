@@ -15,13 +15,13 @@ function [rtn,t] = darkEPFFT(data)
 		collectArray(:,count) = data{count,1}(:,2);
 	endfor
 
-	%constLinearRmX = [ones(divLength,1),(1:divLength)'];
-	%[cLRB,clRS,clRR,clRErr,clRCov] = ols2(collectArray,constLinearRmX);
-	%driftFix = collectArray .- constLinearRmX*cLRB;
+	constLinearRmX = [ones(divLength,1),(1:divLength)'];
+	[cLRB,clRS,clRR,clRErr,clRCov] = ols2(collectArray,constLinearRmX);
+	driftFix = collectArray .- constLinearRmX*cLRB;
 
 	%Calculates fft for each chunk simultaneously
-	%compOut = fft(driftFix); %(Removed drift)
-	compOut = fft(collectArray); %(No drift fix)
+	compOut = fft(driftFix); %(Removed drift)
+	%compOut = fft(collectArray); %(No drift fix)
 	%Creates frequency array for only 0 to 1/(2*interval) frequencies
 	fSeries = ((0:rows(compOut)/2)')./(rows(compOut)*interval);
 	%Checks that array is symmetric about the nyquist frequency
@@ -34,7 +34,7 @@ function [rtn,t] = darkEPFFT(data)
 	%Prepares output arrays
 	%A = [fSeries,real(compOut)]; %Cosine components of FFT (columns correspond to hours)
 	%B = [fSeries,imag(compOut)]; %Sine components of FFT (columns correspond to hours)
-  rtn = compOut'; %Returns columns as frequencies and rows as hours
+	rtn = compOut'; %Returns columns as frequencies and rows as hours
 	t = cell2mat(data(:,2)); %Labels hour counter for each row
 endfunction
 

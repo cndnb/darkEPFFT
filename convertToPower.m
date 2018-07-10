@@ -6,5 +6,5 @@ function pwr = convertToPower(betaModA, betaModB,kappa,resonanceFreq,qFactor)
                      (betaModA(:,4).^2) + (betaModA(:,5).^2) + (betaModB(:,4).^2) + (betaModB(:,5).^2))./tau);
 
 	%Return array
-	pwr = [betaModA(:,1),zComp,perpX,paraX,sumComp];
+	pwr = [betaModA(:,1),zComp,planeX,sumComp];
 endfunction

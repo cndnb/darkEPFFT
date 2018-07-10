@@ -2,10 +2,10 @@
 %test torqueSim
 
 %Make some time
-t = 1:1e6;t=t';
+t = 1:1e4; t = t';
 
 %Injected signal parameters
-A = 1;
+A = 1e-15;
 omegaSearch = 2*pi*5e-2;
 omegaEarth = 2*pi*(1/86164.0916);
 
