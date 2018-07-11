@@ -4,19 +4,19 @@ if (!exist('divHours'))
 endif
 [A,B,t] = darkEPFFT(divHours);
 
-figure(1);
-waterfall(t,A(:,1),A(:,2:end));
-title('Cosine amplitude')
-xlabel('hours');
-ylabel('Frequency (Hz)');
-zlabel('FFT Amplitude');
+%figure(1);
+%waterfall(t,A(:,1),A(:,2:end));
+%title('Cosine amplitude')
+%xlabel('hours');
+%ylabel('Frequency (Hz)');
+%zlabel('FFT Amplitude');
 
-figure(2);
-waterfall(t,B(:,1),B(:,2:end));
-title('Sine amplitude');
-xlabel('hours');
-ylabel('Frequency (Hz)');
-zlabel('FFT Amplitude');
+%figure(2);
+%waterfall(t,B(:,1),B(:,2:end));
+%title('Sine amplitude');
+%xlabel('hours');
+%ylabel('Frequency (Hz)');
+%zlabel('FFT Amplitude');
 
 if ((!exist('Z'))||(!exist('X')))
 	disp('Calculating Z and X');
@@ -51,3 +51,13 @@ title('Torque Power vs. Frequency');
 legend('Z','perpX','paraX','sum');
 xlabel('Frequency (Hz)');
 ylabel('Torque Power');
+
+figure(4);
+loglog(bMA(:,1),bMA(:,2),bMA(:,1),bMA(:,3));
+title('A comp');
+legend('sin','cos');
+
+figure(5);
+loglog(bMB(:,1),bMB(:,2),bMB(:,1),bMB(:,3));
+title('B comp');
+legend('sin','cos');
