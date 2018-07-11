@@ -2,7 +2,7 @@
 %test torqueSim
 
 %Make some time
-t = 1:1e4; t = t';
+t = 1:1e5; t = t';
 
 %Injected signal parameters
 A = 1e-15;
