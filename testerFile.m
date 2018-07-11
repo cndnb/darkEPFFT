@@ -10,7 +10,11 @@ endif
 %xlabel('hours');
 %ylabel('Frequency (Hz)');
 %zlabel('FFT Amplitude');
+<<<<<<< HEAD
 %
+=======
+
+>>>>>>> 331c68e44e5c772eb480c69da69e8b5ba988d897
 %figure(2);
 %waterfall(t,B(:,1),B(:,2:end));
 %title('Sine amplitude');
@@ -43,3 +47,13 @@ title('Torque Power vs. Frequency');
 legend('Z','planeX','sum');
 xlabel('Frequency (Hz)');
 ylabel('Torque Power');
+
+figure(4);
+loglog(bMA(:,1),bMA(:,2),bMA(:,1),bMA(:,3));
+title('A comp');
+legend('sin','cos');
+
+figure(5);
+loglog(bMB(:,1),bMB(:,2),bMB(:,1),bMB(:,3));
+title('B comp');
+legend('sin','cos');

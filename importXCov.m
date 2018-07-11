@@ -1,4 +1,4 @@
-%Initializing design matrix (very large) %UPDATE%
+%Initializing design matrix (very large) 
 %Initializing important variables
 omegaEarth = 2*pi*(1/86164.0916);
 hourLength = 4096;
