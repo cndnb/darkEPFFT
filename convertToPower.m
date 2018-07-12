@@ -1,10 +1,10 @@
-function pwr = convertToPower(betaModA, betaModB,kappa,resonanceFreq,qFactor) %NEEDS TO BE CORRECTED
-	tau = transferFunction(betaModA(:,1),kappa,resonanceFreq,qFactor);
-	zComp = abs(sqrt((betaModA(:,2).^2) + (betaModA(:,3).^2) + (betaModB(:,2).^2) + (betaModB(:,3).^2))./tau);
-	perpX = abs(sqrt((betaModA(:,4).^2) + (betaModA(:,5).^2) + (betaModB(:,4).^2) + (betaModB(:,5).^2))./tau);
-	paraX = abs(sqrt((betaModA(:,6).^2) + (betaModA(:,7).^2) + (betaModB(:,6).^2) + (betaModB(:,7).^2))./tau);
-	sumComp = abs(sqrt((betaModA(:,2).^2) + (betaModA(:,3).^2) + (betaModB(:,2).^2) + (betaModB(:,3).^2) + (betaModA(:,4).^2) + (betaModA(:,5).^2) + (betaModB(:,4).^2) + (betaModB(:,5).^2) + (betaModA(:,6).^2) + (betaModA(:,7).^2) + (betaModB(:,6).^2) + (betaModB(:,7).^2))./tau);
+function pwr = convertToPower(bA, bB,kappa,resonanceFreq,qFactor) %NEEDS TO BE CORRECTED
+	tau = transferFunction(bA(:,1),kappa,resonanceFreq,qFactor);
+	zComp = abs(((bA(:,2).*bB(:,3)) + (bB(:,2).*bA(:,3)))./tau);
+	perpX = abs(sqrt(((bA(:,4).*bA(:,5)).^2) + (bB(:,4).*bB(:,5)).^2)./tau);
+	paraX = abs(sqrt(((bA(:,6).*bA(:,7)).^2) + (bB(:,6).*bB(:,7)).^2)./tau);
+	sumComp = sqrt(zComp.^2 + perpX.^2 + paraX.^2);
 
 	%Return array
-	pwr = [betaModA(:,1),zComp,perpX,paraX,sumComp];
+	pwr = [bA(:,1),zComp,perpX,paraX,sumComp];
 endfunction
