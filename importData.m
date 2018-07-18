@@ -1,7 +1,22 @@
 clear O;
 
-O = load('fakeDarkEPAugust92017.dat');
+%Parameters of the experiment
+I = 378/1e7;                                                                    
+f0 = 1.9338e-3;                                                                 
+kappa = ((2*pi*f0)^2)*I;                                                        
+Q = 500000;                                                                     
+Temp = 273+24; 
 
+%Choosing data
+%O = load('fakeDarkEPAugust92017.dat');
+
+t = 1:1000000; t = t';
+A = 1;
+f = 2*pi*(5e-2);
+s = A.*sin(f.*t);
+O = [t,s];
+
+%Sorting into hour length chunks
 fullHour = 4096;
 tempO = [O(:,1),O];
 tempO(:,1) = tempO(:,1).-1;

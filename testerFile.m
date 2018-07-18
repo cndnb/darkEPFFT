@@ -4,19 +4,19 @@ if (!exist('divHours'))
 endif
 [A,B,t] = darkEPFFT(divHours);
 
-figure(1);
-waterfall(t,A(:,1),A(:,2:end));
-title('Cosine amplitude')
-xlabel('hours');
-ylabel('Frequency (Hz)');
-zlabel('FFT Amplitude');
+%figure(1);
+%waterfall(t,A(:,1),A(:,2:end));
+%title('Cosine amplitude')
+%xlabel('hours');
+%ylabel('Frequency (Hz)');
+%zlabel('FFT Amplitude');
 
-figure(2);
-waterfall(t,B(:,1),B(:,2:end));
-title('Sine amplitude');
-xlabel('hours');
-ylabel('Frequency (Hz)');
-zlabel('FFT Amplitude');
+%figure(2);
+%waterfall(t,B(:,1),B(:,2:end));
+%title('Sine amplitude');
+%xlabel('hours');
+%ylabel('Frequency (Hz)');
+%zlabel('FFT Amplitude');
 
 if ((!exist('Z'))||(!exist('X')))
 	disp('Calculating Z and X');
