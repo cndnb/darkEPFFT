@@ -41,7 +41,7 @@ fflush(stdout);
 disp('done');
 disp('Converting time amplitude to torque power');
 fflush(stdout);
-pwr = convertToPower(bMA,bMB,kappa,f0,Q);
+pwr = convertToPower(bMA,bMB,kappa,f0,Q,fullLength);
 disp('done');
 fflush(stdout);
 
