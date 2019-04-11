@@ -1,6 +1,11 @@
 %Importing data
+%d = load('fakeDarkEPAugust92017.dat');
+d = fData;
+
+divHours = 0;
+fullLength = 0;
 if (!exist('divHours'))
-	error('need data');
+	[divHours,fullLength] = importData(d);
 endif
 [A,B,t] = darkEPFFT(divHours);
 
@@ -18,7 +23,7 @@ endif
 %ylabel('Frequency (Hz)');
 %zlabel('FFT Amplitude');
 
-if ((!exist('Z'))||(!exist('X')))
+if (!exist('ZX'))
 	disp('Calculating Z and X');
 	fflush(stdout);
 	importXCov;

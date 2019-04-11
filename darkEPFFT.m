@@ -15,21 +15,12 @@ function [A,B,t] = darkEPFFT(data)
 		collectArray(:,count) = data{count,1}(:,2);
 	endfor
 
-	%constLinearRmX = [ones(divLength,1),(1:divLength)'];
-	%[cLRB,clRS,clRR,clRErr,clRCov] = ols2(collectArray,constLinearRmX);
-	%driftFix = collectArray .- constLinearRmX*cLRB;
-
 	%Calculates fft for each chunk simultaneously
-	%compOut = fft(driftFix); %(Removed drift)
 	compOut = fft(collectArray); %(No drift fix)
 	%Creates frequency array for only 0 to 1/(2*interval) frequencies
 	fSeries = ((0:rows(compOut)/2)')./(rows(compOut)*interval);
-	%Checks that array is symmetric about the nyquist frequency
-	assert(compOut(2:rows(compOut)/2,:),conj(flip(compOut((rows(compOut)/2)+2:end,:))));
 	%Since array is symmetric about the nyquist frequency, half the matrix can be removed
 	compOut = compOut(1:((rows(compOut)/2) + 1),:);
-	%Checks that the number of frequencies lines up with the number of values.
-	assert(rows(fSeries), rows(compOut));
 	
 	%Prepares output arrays
 	A = [fSeries,real(compOut)]; %Cosine components of FFT (columns correspond to hours)

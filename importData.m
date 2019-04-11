@@ -1,5 +1,4 @@
-clear O;
-
+function [rtn,fullLength] = importData(dMatrix);
 %Parameters of the experiment
 I = 378/1e7;                                                                    
 f0 = 1.9338e-3;                                                                 
@@ -8,13 +7,15 @@ Q = 500000;
 Temp = 273+24; 
 
 %Choosing data
-%O = load('fakeDarkEPAugust92017.dat');
+preO = dMatrix;
 
-t = 1:1000000; t = t';
-A = 1;
-f = 2*pi*(5e-2);
-s = A.*sin(f.*t);
-O = [t,s];
+O = torsionFilter(preO(:,1),preO(:,2),1/f0);
+
+%t = 1:1000000; t = t';
+%A = 1;
+%f = 2*pi*(5e-2);
+%s = A.*sin(f.*t);
+%O = [t,s];
 
 %Sorting into hour length chunks
 fullHour = 4096;
@@ -42,10 +43,13 @@ for count = 1:rows(divHours)
 endfor
 assert(O,fullTimeSeries);
 
+divRemoved = 0;
 for count = 1:rows(divHours)
-	if (rows(divHours{count,1}) != fullHour)
-		divHours(count,:) = [];
+	if (rows(divHours{count - divRemoved,1}) != fullHour)
+		divHours(count - divRemoved,:) = [];
+		divRemoved = divRemoved + 1;
 	endif
 endfor
 fullLength = rows(divHours)*fullHour;
-
+rtn = divHours;
+endfunction
