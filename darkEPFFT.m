@@ -1,4 +1,4 @@
-function [rtn,t] = darkEPFFT(data)
+function [A,B,t] = darkEPFFT(data)
 	%Checks that the input matrix has the correct size and is not complex
 	divLength = 4096; %Optimized for FFT computation
 	for count = 1:rows(data)
@@ -16,16 +16,15 @@ function [rtn,t] = darkEPFFT(data)
 	endfor
 
 	%Calculates fft for each chunk simultaneously
-	compOut = fft(collectArray); %(No drift fix)
+	compOut = fft(collectArray);
 	%Creates frequency array for only 0 to 1/(2*interval) frequencies
 	fSeries = ((0:rows(compOut)/2)')./(rows(compOut)*interval);
 	%Since array is symmetric about the nyquist frequency, half the matrix can be removed
 	compOut = compOut(1:((rows(compOut)/2) + 1),:);
 	
 	%Prepares output arrays
-	%A = [fSeries,real(compOut)]; %Cosine components of FFT (columns correspond to hours)
-	%B = [fSeries,imag(compOut)]; %Sine components of FFT (columns correspond to hours)
-	rtn = compOut'; %Returns columns as frequencies and rows as hours
+	A = [fSeries,real(compOut)]; %Cosine components of FFT (columns correspond to hours)
+	B = [fSeries,imag(compOut)]; %Sine components of FFT (columns correspond to hours)
 	t = cell2mat(data(:,2)); %Labels hour counter for each row
 endfunction
 

@@ -22,7 +22,7 @@ I = 378/1e7;
 f0 = 1.9338e-3;                                                                 
 kappa = ((2*pi*f0)^2)*I;                                                        
 Q = 500000;                                                                     
-Temp = 273+24; 
+Temp = 0;%273+24; 
 
 %Simulate a pendulum
 T= torqueSim(t,I, kappa,Q, Temp, finalSignal);
@@ -31,7 +31,7 @@ T= torqueSim(t,I, kappa,Q, Temp, finalSignal);
 AutocollimatorNoise = randn(size(t)) * 0.5e-9;
 
 %Generate measured angle output (THIS IS THE SAME AS THE FAKE DATASET!)
-O = [T(:,1) T(:,2) + AutocollimatorNoise];
+O = [T(:,1) T(:,2) ];%+ AutocollimatorNoise];
 
 %Re-compute torque
 accel = diff(diff(O(:,2)));

@@ -1,28 +1,32 @@
 %Importing data
 %d = load('fakeDarkEPAugust92017.dat');
-d = fData;
-
 divHours = 0;
 fullLength = 0;
-if (!exist('divHours'))
-	[divHours,fullLength] = importData(d);
-endif
+[divHours,fullLength] = importData(d);
 
-[compOut,t] = darkEPFFT(divHours);
-if (!exist('ZX'))
+
+[A,B,t] = darkEPFFT(divHours);
 	disp('Calculating Z and X');
 	fflush(stdout);
 	importXCov;
 	disp('done');
 	fflush(stdout);
-endif 
+
+tA = A(:,2:end)';
+tB = B(:,2:end)';
+Y = zeros(rows(tA),2*columns(tA(:,2:end)));
+for count = 1:columns(tA)
+	Y(:,2*(count-1)+1:2*count) = [tA(:,count),tB(:,count)];
+endfor
+Y = repmat(Y,numBlocks,1);
 
 %Fitting using precomputed design matrix to find variations in A,B over time
 disp('OLS fitting each frequency');
 fflush(stdout);
-[bMA,bMB] = dailyModFit(compOut,reZX,imZX,designColumns,fullLength);
+[bMA,bMB,freqArray] = dailyModFit(Y,ZX,numBlocks,designColumns,numHours,fullLength,A(2,1)-A(1,1));
 disp('done');
-disp('Converting time amplitude to torque power');
+
+disp('Converting freq amplitude to torque power');
 fflush(stdout);
 pwr = convertToPower(bMA,bMB,kappa,f0,Q,fullLength);
 disp('done');

@@ -2,75 +2,43 @@
 %Initializing important variables
 omegaEarth = 2*pi*(1/86164.0916);
 hourLength = 4096;
-omegaEarthHr = omegaEarth*hourLength; %(hourLength s / 1 division)
+omegaEarthHr = omegaEarth*hourLength; %(3600s / 1 division)
+degSeattleLat = 47.6593743;
+degSeattleLong = -122.30262920000001;
+degCompassDir = 30;
+%%Defining the X vector at January 1st 2000 00:00 UTC
+%%Using the website https://www.timeanddate.com/worldclock/sunearth.html
+%%At the time Mar 20 2000 07:35 UT
+%%80*24*3600 + 7*3600 + 35*60 = 6939300 seconds since January 1, 2000 00:00:00 UTC
+%%At the vernal equinox, longitude is equal to zero, so z=0;
+vernalEqLong = 68.1166667;
+%
+%%Prepares seattleLat in terms of equatorial cordinates at January 1, 2000 00:00:00 UTC
+%%This is the angle of seattleLat from the X vector
+%%Additionally converts all angles to radians
+seattleLong = ((pi/180)*(degSeattleLong + vernalEqLong)-omegaEarth*6939300);
+seattleLat = (pi/180)*degSeattleLat;
+compassDir = (pi/180)*degCompassDir;
+startTime = 0;
+
+%Matrix parameters
 designColumns = 6;
 numHours = rows(divHours);
 fullLength = numHours*hourLength;
-freqArray = (0:(fullLength/2))' ./ (fullLength);
-numFreq = rows(freqArray);
+numBlocks = floor(fullLength/hourLength);
 
-seattleLat = (pi/180)*47.6593743;
-compassDir = pi/6;
-phi = omegaEarthHr.*t;
+
 
 %Creating design matrix, Z = X' * X, and precalculating Z * X'
+t=(1:numHours)';
 oFreqCol = 3;
-X = zeros(numHours*(numBlocks),designColumns*(numBlocks) - oFreqCol);
-X(1:numHours,1:oFreqCol) = [ones(numHours,1)*cos(seattleLat)*cos(compassDir),(-cos(phi)*sin(compassDir)-sin(seattleLat)*cos(compassDir)*sin(phi)),(sin(phi)*sin(compassDir)-sin(seattleLat)*cos(compassDir)*cos(phi))];
+dirVal = preCalcComponents(t,seattleLat,seattleLong,compassDir,startTime);
+X = zeros(numHours*(numBlocks),designColumns*(numBlocks) - (designColumns - oFreqCol));
+X(1:numHours,1:oFreqCol) = [ones(numHours,1),sin(omegaEarthHr.*t),cos(omegaEarthHr.*t)];
 for count = 2:numBlocks
-	X(((count-1)*numHours+1):(count*numHours),((count-1)*designColumns+1) - oFreqCol:(count*designColumns) - oFreqCol) = ...
-		[sin(((count*hourLength)/(fullLength)).*t)*cos(seattleLat)*cos(compassDir),... 
-		 cos(((count*hourLength)/(fullLength)).*t)*cos(seattleLat)*cos(compassDir),...   
-		 sin(((count*hourLength)/(fullLength)).*t).*(-cos(phi)*sin(compassDir)-sin(seattleLat)*cos(compassDir)*sin(phi)),... 
-		 cos(((count*hourLength)/(fullLength)).*t).*(-cos(phi)*sin(compassDir)-sin(seattleLat)*cos(compassDir)*sin(phi)),...   
-		 sin(((count*hourLength)/(fullLength)).*t).*(sin(phi)*sin(compassDir)-sin(seattleLat)*cos(compassDir)*cos(phi)),... 
-		 cos(((count*hourLength)/(fullLength)).*t).*(sin(phi)*sin(compassDir)-sin(seattleLat)*cos(compassDir)*cos(phi))];   
+	X(((count-1)*numHours+1):(count*numHours),((count-1)*designColumns+1) - (designColumns - oFreqCol):(count*designColumns) - (designColumns - oFreqCol)) = ...
+		createSineComponents(t,2*pi*((count)/(fullLength)),dirVal,[1,1,1,1,1,1,0,0,0,0]);
 endfor
-disp('done');
 
-%Resorts data so that each column is a frequency fit
-disp('Sorting into column vectors');
-fflush(stdout);
-shortX = ones(numHours*(hourLength/2 + 1),numFreq,designColumns); 
-for count = 1:numFreq
-  shortX(:,count,1) = reshape(X(:,(hourLength/2 + 1)*(count-1) + 1:(hourLength/2 + 1)*count,1),numHours*(hourLength/2 + 1),1);
-  shortX(:,count,2) = reshape(X(:,(hourLength/2 + 1)*(count-1) + 1:(hourLength/2 + 1)*count,2),numHours*(hourLength/2 + 1),1);
-  shortX(:,count,3) = reshape(X(:,(hourLength/2 + 1)*(count-1) + 1:(hourLength/2 + 1)*count,3),numHours*(hourLength/2 + 1),1);
-  shortX(:,count,4) = reshape(X(:,(hourLength/2 + 1)*(count-1) + 1:(hourLength/2 + 1)*count,4),numHours*(hourLength/2 + 1),1);
-  shortX(:,count,5) = reshape(X(:,(hourLength/2 + 1)*(count-1) + 1:(hourLength/2 + 1)*count,5),numHours*(hourLength/2 + 1),1);
-  shortX(:,count,6) = reshape(X(:,(hourLength/2 + 1)*(count-1) + 1:(hourLength/2 + 1)*count,6),numHours*(hourLength/2 + 1),1);
-endfor
-disp('done');
-fflush(stdout);
-
-reShortX = real(shortX);
-imShortX = imag(shortX);
-
-%Initializes the weight array from the measured fft values
-sigmaW = ones(numHours*((hourLength/2) + 1),1);
-sigmaW = abs(reshape(compOut,rows(sigmaW),1));
-sigmaW = diag(sigmaW);
-
-
-disp('matrix inversions');
-fflush(stdout);
-%BETA = inv (Z) * X' * W * Y, Z = X' * W * X => BETA = (re/im)ZX * Y
-%Real Components
-reZX(:,:,1) = inv(reShortX(:,:,1)' * sigmaW * reShortX(:,:,1)) * reShortX(:,:,1)' * sigmaW;
-reZX(:,:,2) = inv(reShortX(:,:,2)' * sigmaW * reShortX(:,:,2)) * reShortX(:,:,2)' * sigmaW;
-reZX(:,:,3) = inv(reShortX(:,:,3)' * sigmaW * reShortX(:,:,3)) * reShortX(:,:,3)' * sigmaW;
-reZX(:,:,4) = inv(reShortX(:,:,4)' * sigmaW * reShortX(:,:,4)) * reShortX(:,:,4)' * sigmaW;
-reZX(:,:,5) = inv(reShortX(:,:,5)' * sigmaW * reShortX(:,:,5)) * reShortX(:,:,5)' * sigmaW;
-reZX(:,:,6) = inv(reShortX(:,:,6)' * sigmaW * reShortX(:,:,6)) * reShortX(:,:,6)' * sigmaW;
-
-%Imaginary components
-imZX(:,:,1) = inv(imShortX(:,:,1)' * sigmaW * imShortX(:,:,1)) * imShortX(:,:,1)' * sigmaW;
-imZX(:,:,2) = inv(imShortX(:,:,2)' * sigmaW * imShortX(:,:,2)) * imShortX(:,:,2)' * sigmaW;
-imZX(:,:,3) = inv(imShortX(:,:,3)' * sigmaW * imShortX(:,:,3)) * imShortX(:,:,3)' * sigmaW;
-imZX(:,:,4) = inv(imShortX(:,:,4)' * sigmaW * imShortX(:,:,4)) * imShortX(:,:,4)' * sigmaW;
-imZX(:,:,5) = inv(imShortX(:,:,5)' * sigmaW * imShortX(:,:,5)) * imShortX(:,:,5)' * sigmaW;
-imZX(:,:,6) = inv(imShortX(:,:,6)' * sigmaW * imShortX(:,:,6)) * imShortX(:,:,6)' * sigmaW;
-
-disp('done');
-fflush(stdout);
-  
+Z = inv(X' * X);
+ZX = Z * X';
