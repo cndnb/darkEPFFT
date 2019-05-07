@@ -22,7 +22,7 @@ compassDir = (pi/180)*degCompassDir;
 startTime = 0;
 
 %Matrix parameters
-designColumns = 6;
+designColumns = 2;
 numHours = rows(divHours);
 fullLength = numHours*hourLength;
 numBlocks = floor(fullLength/hourLength);
@@ -31,13 +31,21 @@ numBlocks = floor(fullLength/hourLength);
 
 %Creating design matrix, Z = X' * X, and precalculating Z * X'
 t=(1:numHours)';
-oFreqCol = 3;
+oFreqCol = 2;
 dirVal = preCalcComponents(t,seattleLat,seattleLong,compassDir,startTime);
-X = zeros(numHours*(numBlocks),designColumns*(numBlocks) - (designColumns - oFreqCol));
-X(1:numHours,1:oFreqCol) = [ones(numHours,1),sin(omegaEarthHr.*t),cos(omegaEarthHr.*t)];
-for count = 2:numBlocks
-	X(((count-1)*numHours+1):(count*numHours),((count-1)*designColumns+1) - (designColumns - oFreqCol):(count*designColumns) - (designColumns - oFreqCol)) = ...
-		createSineComponents(t,2*pi*((count)/(fullLength)),dirVal,[1,1,1,1,1,1,0,0,0,0]);
+
+
+X = zeros(2*numHours*(numBlocks),designColumns*(numBlocks));
+freqVal = zeros(numBlocks,1);
+
+oFreqCol = 0;
+for count = 1:numBlocks
+	freqVal(count,1) = ((count-1)+floor(-numBlocks/2))/fullLength;
+	if(freqVal(count,1) == 0)
+		X(((count-1)*(2*numHours)+1):(count*(2*numHours)),((count-1)*designColumns+1):(count*designColumns)) = [ones(numHours,1),zeros(numHours,1);zeros(numHours,1),ones(numHours,1)];
+	else
+		X(((count-1)*(2*numHours)+1):(count*(2*numHours)),((count-1)*designColumns+1):(count*designColumns)) = [createSineComponents(t,2*pi*(freqVal(count,1)),ones(numHours,3),[1,1,0,0,0,0,0,0,0,0]);fliplr(createSineComponents(t,2*pi*(freqVal(count,1)),ones(numHours,3),[1,1,0,0,0,0,0,0,0,0]))];
+	endif
 endfor
 
 Z = inv(X' * X);

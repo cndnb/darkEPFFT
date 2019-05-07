@@ -2,7 +2,7 @@
 %test torqueSim
 
 %Make some time
-t = 1:1e5; t = t';
+t = 1:1e6; t = t';
 
 %Injected signal parameters
 A = 1e-16;
@@ -34,13 +34,11 @@ AutocollimatorNoise = randn(size(t)) * 0.5e-9;
 O = [T(:,1) T(:,2) ];%+ AutocollimatorNoise];
 
 %Re-compute torque
-accel = diff(diff(O(:,2)));
-Tor = I*accel + kappa*O(2:end-1,2);
-
+Tor = internalTorque(O,I,kappa,Q);
 
 %Checks that peaks are at the correct points
 figure(1);
-check = psd(t(2:length(t)-1,1),Tor);
+check = psd(Tor);
 loglog(check(:,1),check(:,2));
 
 %fullHour = 4096;

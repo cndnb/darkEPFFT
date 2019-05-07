@@ -1,11 +1,4 @@
 function [A,B,t] = darkEPFFT(data)
-	%Checks that the input matrix has the correct size and is not complex
-	divLength = 4096; %Optimized for FFT computation
-	for count = 1:rows(data)
-		assert(rows(data{count,1}) == divLength,char('Data must have length',num2str(divLength)));
-		assert(imag(data{count,1}) == zeros(rows(data{count,1}),1),'data must be real')
-	endfor
-	
 	%Finds the collection inteval for the discrete fourier transform
 	interval = data{1,1}(2,1) - data{1,1}(1,1);
 

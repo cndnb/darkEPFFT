@@ -45,7 +45,9 @@ compassDir = (pi/180)*degCompassDir;
 %importing data
 %d = load('fakeDarkEPAugust92017.dat');
 
+
 d = fData;
+d(:,2) = d(:,2) - mean(d(:,2));
 
 %Converts data to torque for fitting
 torqueD = internalTorque(d,I,kappa,Q);
@@ -61,18 +63,19 @@ fullLength = 0;
 	disp('done');
 	fflush(stdout);
 
+shortFreqArray = A(:,1);
 tA = A(:,2:end)';
 tB = B(:,2:end)';
-Y = zeros(rows(tA),2*columns(tA(:,2:end)));
+Y = zeros(2*rows(tA),columns(tA));
 for count = 1:columns(tA)
-	Y(:,2*(count-1)+1:2*count) = [tA(:,count),tB(:,count)];
+	Y(:,count) = [tA(:,count);tB(:,count)];
 endfor
 Y = repmat(Y,numBlocks,1);
 
 %Fitting using precomputed design matrix to find variations in A,B over time
 disp('OLS fitting each frequency');
 fflush(stdout);
-[bMA,bMB,freqArray] = dailyModFit(Y,ZX,numBlocks,designColumns,numHours,fullLength,A(2,1)-A(1,1));
+[bMA,bMB,freqArray] = dailyModFit(Y,ZX,numBlocks,designColumns,numHours,fullLength,A(2,1)-A(1,1),freqVal,shortFreqArray);
 disp('done');
 
 disp('Converting freq amplitude to torque power');
@@ -82,12 +85,12 @@ disp('done');
 fflush(stdout);
 
 
-figure(3);
-loglog(pwr(:,1),pwr(:,2),pwr(:,1),pwr(:,3),pwr(:,1),pwr(:,4));%,pwr(:,1),pwr(:,5));
-title('Torque Power vs. Frequency');
-legend('Z','perpX','paraX'); %,'sum');
-xlabel('Frequency (Hz)');
-ylabel('Torque Power');
+%figure(3);
+%loglog(pwr(:,1),pwr(:,2),pwr(:,1),pwr(:,3),pwr(:,1),pwr(:,4));%,pwr(:,1),pwr(:,5));
+%title('Torque Power vs. Frequency');
+%legend('Z','perpX','paraX'); %,'sum');
+%xlabel('Frequency (Hz)');
+%ylabel('Torque Power');
 
 figure(4);
 loglog(pwr(:,1),pwr(:,2));
@@ -95,17 +98,17 @@ title('Z comp Power');
 xlabel('Frequency (Hz)');
 ylabel('Torque Power');
 
-figure(5);
-loglog(pwr(:,1),pwr(:,3));
-title('PerpX comp Power');
-xlabel('Frequency (Hz)');
-ylabel('Torque Power');
+%figure(5);
+%loglog(pwr(:,1),pwr(:,3));
+%title('PerpX comp Power');
+%xlabel('Frequency (Hz)');
+%ylabel('Torque Power');
 
-figure(6);
-loglog(pwr(:,1),pwr(:,4));
-title('paraX comp Power');
-xlabel('Frequency (Hz)');
-ylabel('Torque Power');
+%figure(6);
+%loglog(pwr(:,1),pwr(:,4));
+%title('paraX comp Power');
+%xlabel('Frequency (Hz)');
+%ylabel('Torque Power');
 
 %figure(4);
 %semilogx(bMA(:,1),bMA(:,2),bMA(:,1),bMA(:,3));
