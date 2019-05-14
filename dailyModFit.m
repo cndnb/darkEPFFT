@@ -7,30 +7,40 @@ function [allA,allB,freqArray] = dailyModFit(Y,ZX,n,numDesignCol,numHours,dataLe
 	freqArray = (0:(dataLength/2))' ./ (dataLength);
 	freqCheck = ones(rows(freqArray),1);
 	out = zeros(rows(freqArray),2);
-	columns(Y)
-	fflush(stdout);
-	pause(3);
-	for freqCount = 1:columns(Y)
-		placeInd = (freqCount-1)*n+1;
-		freqCount
-		fflush(stdout);
-		BETA = (ZX*Y(:,freqCount));
-		newBETA = ones(n,2);
-		for count = 1:n
-			if(placeInd + (count-1) + floor(-n/2) < 1 || placeInd + (count-1) + floor(-n/2) > rows(freqArray)) 
-			else
-				freqCheck(placeInd+(count-1)+floor(-n/2),1) = freqVal(count) + shortFreqArray(freqCount);
-				out(placeInd+(count-1)+floor(-n/2),1) = BETA(2*(count-1)+1,1);
-				out(placeInd+(count-1)+floor(-n/2),2) = BETA(2*(count-1)+2,1);
-			endif
-		endfor
-	endfor
+	
+	matBeta = ZX*Y;
+	BETA = reshape(matBeta,[],1);
+	
+	preOut = reshape(BETA',2,[])';
 
-	assert(freqCheck,freqArray,eps);
+	%preOut = zeros(rows(BETA)/2,1);
+	%for count = 1:rows(BETA)/2
+	%	preOut(count,1) = sqrt(BETA(2*(count-1)+1,1).^2+BETA(2*count,1).^2);
+	%endfor
+
+	out = preOut(-floor(-n/2):end+floor(-n/2)+1,:);
+
+	%for freqCount = 1:columns(Y)
+	%	placeInd = (freqCount-1)*n+1;
+	%	freqCount
+	%	fflush(stdout);
+	%	BETA = (ZX*Y(:,freqCount));
+	%	newBETA = ones(n,2);
+	%	for count = 1:n
+	%		if(placeInd + (count-1) + floor(-n/2) < 1 || placeInd + (count-1) + floor(-n/2) > rows(freqArray)) 
+	%		else
+	%			freqCheck(placeInd+(count-1)+floor(-n/2),1) = freqVal(count) + shortFreqArray(freqCount);
+	%			out(placeInd+(count-1)+floor(-n/2),1) = BETA(2*(count-1)+1,1);
+	%			out(placeInd+(count-1)+floor(-n/2),2) = BETA(2*(count-1)+2,1);
+	%		endif
+	%	endfor
+	%endfor
+
+	%assert(freqCheck,freqArray,eps);
 
 	%Sets up return arrays
-	allA = [freqArray,out(:,1)];
-	allB = [freqArray,out(:,2)];
+	allA = out(:,1);
+	allB = out(:,2);
   
 endfunction
 

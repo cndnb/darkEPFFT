@@ -9,11 +9,13 @@ function [A,B,t] = darkEPFFT(data)
 	endfor
 
 	%Calculates fft for each chunk simultaneously
-	compOut = fft(collectArray);
+	compOut = (2/rows(collectArray)).*fft(collectArray);
 	%Creates frequency array for only 0 to 1/(2*interval) frequencies
 	fSeries = ((0:rows(compOut)/2)')./(rows(compOut)*interval);
 	%Since array is symmetric about the nyquist frequency, half the matrix can be removed
 	compOut = compOut(1:((rows(compOut)/2) + 1),:);
+	compOut(1,:) = compOut(1,:)./2;
+	compOut(end,:) = compOut(end,:)./2;
 	
 	%Prepares output arrays
 	A = [fSeries,real(compOut)]; %Cosine components of FFT (columns correspond to hours)

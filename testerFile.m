@@ -42,26 +42,44 @@ seattleLong = ((pi/180)*(degSeattleLong + vernalEqLong)-omegaEarth*6939300);
 seattleLat = (pi/180)*degSeattleLat;
 compassDir = (pi/180)*degCompassDir;
 
+%%%%%%%%%%%%%%%%%%%% IMPORTING DATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %importing data
 %d = load('fakeDarkEPAugust92017.dat');
 
-
 d = fData;
+%d = torsionFilter(fData(:,1),fData(:,2),1/f0);
 d(:,2) = d(:,2) - mean(d(:,2));
 
 %Converts data to torque for fitting
+disp('Converting data to torque');
+fflush(stdout);
 torqueD = internalTorque(d,I,kappa,Q);
+disp('done');
+fflush(stdout);
+
 
 divHours = 0;
 fullLength = 0;
+disp('Reformatting data for analysis');
+fflush(stdout);
 [divHours,fullLength] = importData(torqueD);
+disp('done');
+fflush(stdout);
 
+%%%%%%%%%%%%%%%%%%%% FFT/OLS ANALYSIS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+disp('Initial FFT');
+fflush(stdout);
 [A,B,t] = darkEPFFT(divHours);
-	disp('Calculating Z and X');
-	fflush(stdout);
-	importXCov;
-	disp('done');
-	fflush(stdout);
+disp('done');
+fflush(stdout);
+
+disp('Calculating Z and X');
+fflush(stdout);
+importXCov;
+disp('done');
+fflush(stdout);
 
 shortFreqArray = A(:,1);
 tA = A(:,2:end)';
@@ -84,6 +102,7 @@ pwr = convertToPower(bMA,bMB,kappa,f0,Q,fullLength);
 disp('done');
 fflush(stdout);
 
+%%%%%%%%%%%%%%%%%%%% PLOTTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %figure(3);
 %loglog(pwr(:,1),pwr(:,2),pwr(:,1),pwr(:,3),pwr(:,1),pwr(:,4));%,pwr(:,1),pwr(:,5));
@@ -93,7 +112,7 @@ fflush(stdout);
 %ylabel('Torque Power');
 
 figure(4);
-loglog(pwr(:,1),pwr(:,2));
+loglog(freqArray,pwr);
 title('Z comp Power');
 xlabel('Frequency (Hz)');
 ylabel('Torque Power');
@@ -110,22 +129,3 @@ ylabel('Torque Power');
 %xlabel('Frequency (Hz)');
 %ylabel('Torque Power');
 
-%figure(4);
-%semilogx(bMA(:,1),bMA(:,2),bMA(:,1),bMA(:,3));
-%title('A comp');
-%legend('sin','cos');
-
-%figure(5);
-%semilogx(bMB(:,1),bMB(:,2),bMB(:,1),bMB(:,3));
-%title('B comp');
-%legend('sin','cos');
-
-%figure(4);
-%semilogx(A(:,1),A(:,2),A(:,1),A(:,3));
-%title('A comp');
-%legend('sin','cos');
-
-%figure(5);
-%semilogx(B(:,1),B(:,2),B(:,1),B(:,3));
-%title('B comp');
-%legend('sin','cos');
