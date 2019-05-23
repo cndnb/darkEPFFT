@@ -44,6 +44,8 @@ compassDir = (pi/180)*degCompassDir;
 
 %%%%%%%%%%%%%%%%%%%% IMPORTING DATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+hourLength = 4096;
+
 %importing data
 %d = load('fakeDarkEPAugust92017.dat');
 
@@ -63,7 +65,7 @@ divHours = 0;
 fullLength = 0;
 disp('Reformatting data for analysis');
 fflush(stdout);
-[divHours,fullLength] = importData(torqueD);
+[divHours,fullLength] = importData(torqueD,hourLength);
 disp('done');
 fflush(stdout);
 
@@ -75,9 +77,13 @@ fflush(stdout);
 disp('done');
 fflush(stdout);
 
+%Recovers hour indexing array
+tH = cell2mat(divHours(:,2));
+
 disp('Calculating Z and X');
 fflush(stdout);
-importXCov;
+[Z,X,freqVal,numBlocks] = importXCov(rows(divHours),fullLength,tH,hourLength);
+ZX = Z*X';
 disp('done');
 fflush(stdout);
 
@@ -93,8 +99,10 @@ Y = repmat(Y,numBlocks,1);
 %Fitting using precomputed design matrix to find variations in A,B over time
 disp('OLS fitting each frequency');
 fflush(stdout);
-[bMA,bMB,freqArray] = dailyModFit(Y,ZX,numBlocks,designColumns,numHours,fullLength,A(2,1)-A(1,1),freqVal,shortFreqArray);
+[bMA,bMB] = dailyModFit(Y,ZX,numBlocks);
 disp('done');
+
+freqArray = (0:(fullLength/2))'./fullLength;
 
 disp('Converting freq amplitude to torque power');
 fflush(stdout);

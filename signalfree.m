@@ -6,7 +6,7 @@ t = 1:1e6; t = t';
 
 %Injected signal parameters
 A = 1e-16;
-omegaSearch = 2*pi*5e-2;
+omegaSearch = 2*pi*(sqrt(2))*1e-2;
 omegaEarth = 2*pi*(1/86164.0916);
 
 finalSignal = A.*sin(omegaSearch.*t);

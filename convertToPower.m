@@ -10,6 +10,8 @@ function pwr = convertToPower(bA, bB,kappa,resonanceFreq,qFactor,fullLength) %NE
 	%paraX = abs(sqrt(((bA(:,6).*bA(:,7)).^2) + (bB(:,6).*bB(:,7)).^2))./fullLength;
 	%sumComp = sqrt(zComp.^2 + perpX.^2 + paraX.^2);
 
+	correctionCoeff = 1;
+
 	%Return array
 	pwr = zComp;%,perpX,paraX,sumComp];
 endfunction

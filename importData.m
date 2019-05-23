@@ -1,55 +1,65 @@
-function [rtn,fullLength] = importData(dMatrix);
-%Parameters of the experiment
-I = 378/1e7;                                                                    
-f0 = 1.9338e-3;                                                                 
-kappa = ((2*pi*f0)^2)*I;                                                        
-Q = 500000;                                                                     
-Temp = 273+24; 
-
-%Choosing data
-preO = dMatrix;
-
-O = torsionFilter(preO(:,1),preO(:,2),1/f0);
-
-%t = 1:1000000; t = t';
-%A = 1;
-%f = 2*pi*(5e-2);
-%s = A.*sin(f.*t);
-%O = [t,s];
-
-%Sorting into hour length chunks
-fullHour = 4096;
-tempO = [O(:,1),O];
-tempO(:,1) = tempO(:,1).-1;
-tempO(:,1) = mod(tempO(:,1),fullHour);
-divHours = cell(0,2);
-lastTime = fullHour;
-hourCount = 0;
-for count = 1:rows(tempO)
-	if (lastTime > tempO(count,1))
-		hourCount = hourCount + 1;
-		divHours{hourCount,2} = hourCount; %Allows recovery of specific time later
-		divHours{hourCount,1} = O(count,:);
-	else
-		divHours{hourCount,1} = [divHours{hourCount,1};O(count,:)];
-	endif	
-	lastTime = tempO(count,1);
-endfor
-
-%Makes sure that the division worked correctly 
-fullTimeSeries = [];
-for count = 1:rows(divHours)
-	fullTimeSeries = [fullTimeSeries;divHours{count,1}];
-endfor
-assert(O,fullTimeSeries);
-
-divRemoved = 0;
-for count = 1:rows(divHours)
-	if (rows(divHours{count - divRemoved,1}) != fullHour)
-		divHours(count - divRemoved,:) = [];
-		divRemoved = divRemoved + 1;
+function [rtn,fullLength] = importData(dMatrix,hourLength);
+	if(nargin != 2)
+		error('importData - [divHours,fullLength] = importData(dMatrix,hourLength)');
 	endif
-endfor
-fullLength = rows(divHours)*fullHour;
-rtn = divHours;
+
+	%Choosing data
+	O = dMatrix;
+
+%	bigArray = zeros(ceil(rows(O)/hourLength)*hourLength,columns(O));
+%	bigArray(1:rows(O),:) = O;
+%	divHours = mat2cell(bigArray,hourLength.*ones(1,ceil(rows(O)/hourLength)),2);
+%
+%	divRemoved = 0;
+%	for count = 1:rows(divHours)
+%		if(isnan(divHours{count-divRemoved,1}(:,1)./0) != false(hourLength,1))
+%			divHours(count-divRemoved,:) = [];
+%			divRemoved = divRemoved + 1;
+%		else
+%			divHours(count-divRemoved,2) = count;
+%		endif
+%	endfor
+
+
+	%Sorting into hour length chunks
+	fullHour = hourLength;
+	tempO = [O(:,1),O];
+	tempO(:,1) = tempO(:,1).-1;
+	tempO(:,1) = mod(tempO(:,1),fullHour);
+	divHours = cell(0,2);
+	lastTime = fullHour;
+	hourCount = 0;
+	for count = 1:rows(tempO)
+		if (lastTime > tempO(count,1))
+			hourCount = hourCount + 1;
+			divHours{hourCount,2} = hourCount; %Allows recovery of specific time later
+			divHours{hourCount,1} = O(count,:);
+		else
+			divHours{hourCount,1} = [divHours{hourCount,1};O(count,:)];
+		endif	
+		lastTime = tempO(count,1);
+	endfor
+
+	divRemoved = 0;
+	for count = 1:rows(divHours)
+		if (rows(divHours{count - divRemoved,1}) != fullHour)
+			divHours(count - divRemoved,:) = [];
+			divRemoved = divRemoved + 1;
+		endif
+	endfor
+
+	%Returns values
+	fullLength = rows(divHours)*hourLength;
+	rtn = divHours;
 endfunction
+	
+%!test
+%! t=1:1e5; t=t';
+%! fData = [t,randn(rows(t),1)];
+%! [divHours,fullLength] = importData(fData,4096);
+%! fullTimeSeries = [];
+%! for count = 1:rows(divHours)
+%!	fullTimeSeries = [fullTimeSeries;divHours{count,1}];
+%! endfor
+%! assert(fData(1:rows(fullTimeSeries),:),fullTimeSeries);
+

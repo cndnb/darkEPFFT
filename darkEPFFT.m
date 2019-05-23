@@ -28,21 +28,17 @@ endfunction
 %! A = 1; omega = 2*pi*(1/100);
 %! data = [t,A.*sin(omega.*t)];
 %! divHours = cell(1,2);
-%! divHours{1,1} = data; divHours{1,2} = 1;
-%! [out,t] = darkEPFFT(divHours);
-%! compOut = out';
-%! compOut = [compOut;conj(flip(compOut(2:end-1,:)))];
-%! recoveredTime = ifft(compOut);
-%! assert(abs(real(recoveredTime).-data(:,2)) < 4*eps);	
-
-%!test
-%! t = (1:4096)';
-%! A = 1; omega = 2*pi*(1/100);
-%! data = [t,A.*sin(omega.*t)];
-%! divHours = cell(1,2);
-%! divHours{1,1} = data; divHours{1,2} = 1;
-%! [A,B,t] = darkEPFFT(divHours);
-%! compOut = A(:,2)+i*B(:,2);
-%! compOut = [compOut;conj(flip(compOut(2:end-1,:)))];
-%! Y = divHours{1,1}(:,2);
-%! assert(abs(sum(Y.*Y)-(compOut' * compOut)/rows(data)) < (4096 + 1)*eps);
+%! for count = 1:10
+%! 	divHours{count,1} = data; divHours{count,2} = count;
+%! endfor
+%! [cosTerms,sinTerms,t] = darkEPFFT(divHours);
+%! compOut = (cosTerms(:,2:end) + i*sinTerms(:,2:end));
+%! compOut(1,:) = 2.*compOut(1,:);
+%! compOut(end,:) = 2.*compOut(end,:);
+%! fullCompOut = [compOut;conj(flip(compOut(2:end-1,:)))];
+%! fullCompOut = (4096/2).*fullCompOut;
+%! recoveredTime = ifft(fullCompOut);
+%! for count = 1:10 %Checks that having multiple rows doesn't mess up analysis
+%! 	assert(real(recoveredTime(:,count)),data(:,2),4*eps);%Checks that recreated time series is the same
+%! 	assert(fullCompOut(:,count)'*fullCompOut(:,count)/4096,data(:,2)'*data(:,2));%Tests parseval's theorem
+%! endfor
