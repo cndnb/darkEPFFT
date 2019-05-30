@@ -1,6 +1,7 @@
 function [A,B,t] = darkEPFFT(data)
 	%Finds the collection inteval for the discrete fourier transform
 	interval = data{1,1}(2,1) - data{1,1}(1,1);
+	hourLength = rows(data{1,1});
 
 	%Collects the array into a form that fft can operate on
 	collectArray = ones(rows(data{1,1}),rows(data));
@@ -14,6 +15,15 @@ function [A,B,t] = darkEPFFT(data)
 	fSeries = ((0:rows(compOut)/2)')./(rows(compOut)*interval);
 	%Since array is symmetric about the nyquist frequency, half the matrix can be removed
 	compOut = compOut(1:((rows(compOut)/2) + 1),:);
+
+	%Corrects phase for fft starting at different times
+	colCorrect = exp((2*pi*i*(hourLength)).*fSeries);
+	corArray = zeros(rows(fSeries),columns(compOut));
+	for count = 1:columns(compOut)
+		corArray(:,count) = colCorrect.^(count-1);
+	endfor
+	compOut = compOut.*corArray;	
+
 	compOut(1,:) = compOut(1,:)./2;
 	compOut(end,:) = compOut(end,:)./2;
 	
@@ -23,22 +33,36 @@ function [A,B,t] = darkEPFFT(data)
 	t = cell2mat(data(:,2)); %Labels hour counter for each row
 endfunction
 
+##%!test
+##%! t = (1:4096)';
+##%! A = 1; omega = 2*pi*(1/100);
+##%! data = [t,A.*sin(omega.*t)];
+##%! divHours = cell(1,2);
+##%! for count = 1:10
+##%! 	divHours{count,1} = data; divHours{count,2} = count;
+##%! endfor
+##%! [cosTerms,sinTerms,t] = darkEPFFT(divHours);
+##%! compOut = (cosTerms(:,2:end) + i*sinTerms(:,2:end));
+##%! compOut(1,:) = 2.*compOut(1,:);
+##%! compOut(end,:) = 2.*compOut(end,:);
+##%! fullCompOut = [compOut;conj(flip(compOut(2:end-1,:)))];
+##%! fullCompOut = (4096/2).*fullCompOut;
+##%! recoveredTime = ifft(fullCompOut);
+##%! for count = 1:10 %Checks that having multiple rows doesn't mess up analysis
+##%! 	assert(real(recoveredTime(:,count)),data(:,2),4*eps);%Checks that recreated time series is the same
+##%! 	assert(fullCompOut(:,count)'*fullCompOut(:,count)/4096,data(:,2)'*data(:,2));%Tests parseval's theorem
+##%! endfor
+
 %!test
-%! t = (1:4096)';
+%! t = (1:1e5)';
 %! A = 1; omega = 2*pi*(1/100);
-%! data = [t,A.*sin(omega.*t)];
-%! divHours = cell(1,2);
-%! for count = 1:10
-%! 	divHours{count,1} = data; divHours{count,2} = count;
-%! endfor
-%! [cosTerms,sinTerms,t] = darkEPFFT(divHours);
-%! compOut = (cosTerms(:,2:end) + i*sinTerms(:,2:end));
-%! compOut(1,:) = 2.*compOut(1,:);
+%! data = [t,A*sin(omega.*t)];
+%! [divHours, fullLength] = importData(data,4096);
+%! [A,B,t] = darkEPFFT(divHours);
+%! compOut = (A(:,2:end) + i.*B(:,2:end)); 
+%! compOut(1,:) = 2.*compOut(1,:); 
 %! compOut(end,:) = 2.*compOut(end,:);
-%! fullCompOut = [compOut;conj(flip(compOut(2:end-1,:)))];
-%! fullCompOut = (4096/2).*fullCompOut;
+%! fullCompOut = (4096/2).*[compOut;conj(flip(compOut(2:end-1,:)))];
 %! recoveredTime = ifft(fullCompOut);
-%! for count = 1:10 %Checks that having multiple rows doesn't mess up analysis
-%! 	assert(real(recoveredTime(:,count)),data(:,2),4*eps);%Checks that recreated time series is the same
-%! 	assert(fullCompOut(:,count)'*fullCompOut(:,count)/4096,data(:,2)'*data(:,2));%Tests parseval's theorem
-%! endfor
+%! checkTime = reshape(recoveredTime,[],1); %This should match up correctly because of phase correction
+%! assert(real(checkTime),data(1:rows(checkTime),2),4*eps);
