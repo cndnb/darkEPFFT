@@ -10,25 +10,29 @@ function [Z,X,freqVal,numBlocks] = importXCov(numHours,fullLength,tH,hourLength)
 	designColumns = 2;
 	numBlocks = floor(fullLength/hourLength);
 
-
-
-	%Creating design matrix, Z = X' * X, and precalculating Z * X'
-	oFreqCol = 2;
-
+  %Initializes accumulation arrays
 	X = zeros(2*numHours*(numBlocks),designColumns*(numBlocks));
 	freqVal = zeros(numBlocks,1);
-
+  %Assigns values to intermediate frequency array
+  for count = 1:numBlocks
+    freqVal(count,1) = ((count-1)+floor(-numBlocks/2))/fullLength;
+  endfor
+  %Creates matrix of signs to get correct LC of trig functions for angle sum identities
 	signMat = [ones(numHours,1),-1.*ones(numHours,1);ones(numHours,1),ones(numHours,1)];
+  %Premultiplies frequencies by 2pi
 	freqVec = (2*pi).*freqVal;
+  %Selects only pure sin and cos components in createSineComponents
 	colSel = [1,1,0,0,0,0,0,0,0,0];
+  %Multiplies hours by length of hour to match frequencies (they are 1/seconds)
 	timeH = hourLength.*tH;
-	oFreqCol = 0;
 	for count = 1:numBlocks
-		freqVal(count,1) = ((count-1)+floor(-numBlocks/2))/fullLength;
 		if(freqVal(count,1) == 0)
-			X(((count-1)*(2*numHours)+1):(count*(2*numHours)),((count-1)*designColumns+1):(count*designColumns)) = [ones(numHours,1),zeros(numHours,1);zeros(numHours,1),ones(numHours,1)];
+			X(((count-1)*(2*numHours)+1):(count*(2*numHours)),((count-1)*designColumns+1):(count*designColumns)) = ...
+      [ones(numHours,1),zeros(numHours,1);zeros(numHours,1),ones(numHours,1)];
 		else
-			X(((count-1)*(2*numHours)+1):(count*(2*numHours)),((count-1)*designColumns+1):(count*designColumns)) = signMat.*[createSineComponents(timeH,freqVec(count,1),ones(numHours,3),colSel);fliplr(createSineComponents(timeH,freqVec(count,1),ones(numHours,3),colSel))];
+			X(((count-1)*(2*numHours)+1):(count*(2*numHours)),((count-1)*designColumns+1):(count*designColumns)) = ...
+      signMat.*[createSineComponents(timeH,freqVec(count,1),ones(numHours,3),colSel);...
+      fliplr(createSineComponents(timeH,freqVec(count,1),ones(numHours,3),colSel))];
 		endif
 	endfor
 

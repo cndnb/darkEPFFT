@@ -60,7 +60,7 @@ torqueD = internalTorque(d,I,kappa,Q);
 disp('done');
 fflush(stdout);
 
-
+%Initializes accumulation arrays
 divHours = 0;
 fullLength = 0;
 disp('Reformatting data for analysis');
@@ -71,15 +71,17 @@ fflush(stdout);
 
 %%%%%%%%%%%%%%%%%%%% FFT/OLS ANALYSIS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%Performs FFT on each hour length bin
 disp('Initial FFT');
 fflush(stdout);
 [A,B,t] = darkEPFFT(divHours);
 disp('done');
 fflush(stdout);
 
-%Recovers hour indexing array
+%Recovers hour indexing array from importData cell output
 tH = cell2mat(divHours(:,2));
 
+%Calculates design matrix, as well as prepares matrix for OLS fitting
 disp('Calculating Z and X');
 fflush(stdout);
 [Z,X,freqVal,numBlocks] = importXCov(rows(divHours),fullLength,tH,hourLength);
@@ -87,13 +89,21 @@ ZX = Z*X';
 disp('done');
 fflush(stdout);
 
+fakeSignal = exp((2*pi*i*freqVal(5)*hourLength).*tH);
+
 shortFreqArray = A(:,1);
 tA = A(:,2:end)';
 tB = B(:,2:end)';
+
+%This type of fake signal changes the power of the entire bin
+%tA(:,2) = tA(:,2).*real(fakeSignal);
+%tB(:,2) = tB(:,2).*imag(fakeSignal);
+
+
 Y = zeros(2*rows(tA),columns(tA));
 for count = 1:columns(tA)
 	Y(:,count) = [tA(:,count);tB(:,count)];
-endfor
+endfor 
 Y = repmat(Y,numBlocks,1);
 
 %Fitting using precomputed design matrix to find variations in A,B over time
@@ -102,8 +112,10 @@ fflush(stdout);
 [bMA,bMB] = dailyModFit(Y,ZX,numBlocks);
 disp('done');
 
+%Creates frequency array for full length frequency dataset
 freqArray = (0:(fullLength/2))'./fullLength;
 
+%Converts complex values to power, applies any necessary transfer functions
 disp('Converting freq amplitude to torque power');
 fflush(stdout);
 pwr = convertToPower(bMA,bMB,kappa,f0,Q,fullLength);
@@ -112,28 +124,8 @@ fflush(stdout);
 
 %%%%%%%%%%%%%%%%%%%% PLOTTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%figure(3);
-%loglog(pwr(:,1),pwr(:,2),pwr(:,1),pwr(:,3),pwr(:,1),pwr(:,4));%,pwr(:,1),pwr(:,5));
-%title('Torque Power vs. Frequency');
-%legend('Z','perpX','paraX'); %,'sum');
-%xlabel('Frequency (Hz)');
-%ylabel('Torque Power');
-
-figure(4);
+figure(1);
 loglog(freqArray,pwr);
 title('Z comp Power');
 xlabel('Frequency (Hz)');
 ylabel('Torque Power');
-
-%figure(5);
-%loglog(pwr(:,1),pwr(:,3));
-%title('PerpX comp Power');
-%xlabel('Frequency (Hz)');
-%ylabel('Torque Power');
-
-%figure(6);
-%loglog(pwr(:,1),pwr(:,4));
-%title('paraX comp Power');
-%xlabel('Frequency (Hz)');
-%ylabel('Torque Power');
-
