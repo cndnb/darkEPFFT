@@ -4,12 +4,10 @@ function [A,B,t] = darkEPFFT(data)
 	hourLength = rows(data{1,1});
 
 	%Collects the array into a form that fft can operate on
-	collectArray = ones(rows(data{1,1}),rows(data));
-	for count = 1:rows(data)
-		collectArray(:,count) = data{count,1}(:,2);
-	endfor
+	preCollectArray = cell2mat(divHours(:,1));
+	collectArray = reshape(preCollectArray,hourLength,rows(divHours));
 
-	%Calculates fft for each chunk simultaneously
+	%Calculates fft for each chunk simultaneously multiplied by 2 for one sided power spectrum
 	compOut = (2/rows(collectArray)).*fft(collectArray);
 	%Creates frequency array for only 0 to 1/(2*interval) frequencies
 	fSeries = ((0:rows(compOut)/2)')./(rows(compOut)*interval);
@@ -24,6 +22,7 @@ function [A,B,t] = darkEPFFT(data)
 	endfor
 	compOut = compOut.*corArray;	
 
+	%1 and end values should not be multiplied by 2
 	compOut(1,:) = compOut(1,:)./2;
 	compOut(end,:) = compOut(end,:)./2;
 	
@@ -52,17 +51,3 @@ endfunction
 ##%! 	assert(real(recoveredTime(:,count)),data(:,2),4*eps);%Checks that recreated time series is the same
 ##%! 	assert(fullCompOut(:,count)'*fullCompOut(:,count)/4096,data(:,2)'*data(:,2));%Tests parseval's theorem
 ##%! endfor
-
-%!test
-%! t = (1:1e5)';
-%! A = 1; omega = 2*pi*(1/100);
-%! data = [t,A*sin(omega.*t)];
-%! [divHours, fullLength] = importData(data,4096);
-%! [A,B,t] = darkEPFFT(divHours);
-%! compOut = (A(:,2:end) + i.*B(:,2:end)); 
-%! compOut(1,:) = 2.*compOut(1,:); 
-%! compOut(end,:) = 2.*compOut(end,:);
-%! fullCompOut = (4096/2).*[compOut;conj(flip(compOut(2:end-1,:)))];
-%! recoveredTime = ifft(fullCompOut);
-%! checkTime = reshape(recoveredTime,[],1); %This should match up correctly because of phase correction
-%! assert(real(checkTime),data(1:rows(checkTime),2),4*eps);

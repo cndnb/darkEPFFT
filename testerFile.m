@@ -101,9 +101,7 @@ tB = B(:,2:end)';
 
 
 Y = zeros(2*rows(tA),columns(tA));
-for count = 1:columns(tA)
-	Y(:,count) = [tA(:,count);tB(:,count)];
-endfor 
+Y = [tA;tB];
 Y = repmat(Y,numBlocks,1);
 
 %Fitting using precomputed design matrix to find variations in A,B over time
