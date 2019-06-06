@@ -2,6 +2,7 @@ function [A,B,t] = darkEPFFT(data)
 	%Finds the collection inteval for the discrete fourier transform
 	interval = data{1,1}(2,1) - data{1,1}(1,1);
 	hourLength = rows(data{1,1});
+	tH = cell2mat(data(:,2)); %Gets hour count for each column from data output
 
 	%Collects the array into a form that fft can operate on
 	preCollectArray = cell2mat(data(:,1));
@@ -19,12 +20,13 @@ function [A,B,t] = darkEPFFT(data)
 	compOut(end,:) = compOut(end,:)./2;
 
 	%Corrects phase values to reflect hours they started at
-	phaseCorrected = fftPhaseCorrection(compOut,fSeries,hourLength);
+	%phaseCorrected = fftPhaseCorrection(compOut,fSeries,hourLength,tH);
+	phaseCorrected = compOut;
 	
 	%Prepares output arrays
 	A = [fSeries,real(phaseCorrected)]; %Cosine components of FFT (columns correspond to hours)
 	B = [fSeries,imag(phaseCorrected)]; %Sine components of FFT (columns correspond to hours)
-	t = cell2mat(data(:,2)); %Labels hour counter for each row
+	t = tH;
 endfunction
 
 %!test
