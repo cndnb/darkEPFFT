@@ -1,69 +1,48 @@
-function [rtn,fullLength] = importData(dMatrix,hourLength); %FIX
+function [rtn,fullLength,indArray] = importData(dMatrix,hourLength); %FIX
 	if(nargin != 2)
 		error('importData - [divHours,fullLength] = importData(dMatrix,hourLength)');
 	endif
 
-	%Choosing data
-	O = dMatrix;
-
-	tempO = O(:,1).-1;
-	tempO = mod(tempO,hourLength);
+  %Initializes index finding array, subtracts beginning value so modulus works
+	tempO = dMatrix(:,1).-dMatrix(1,1);
+  %Every hour starts with zero after modulus
+  tempO = mod(tempO,hourLength);
+  %Will catch negative values
 	tempO(2:end) = tempO(2:end) - tempO(1:end-1);
-	divTemp = 1./tempO; infInd = isinf(divTemp);
-	divTemp(infInd) = zeros(rows(infInd),1); 
-	tempO = tempO.*abs(1./tempO) .- 1;
+  %divTemp avoids dividing by zero
+  divTemp = tempO;
+  nonZeroInd = find(divTemp);
+	divTemp(nonZeroInd,1) = abs(1./tempO(nonZeroInd));
+  %By dividing by abs value and subtracting one, negatives stay negative 
+  %positive usual counting values go to zero, 
+  %find can pick of hour starting indices
+	tempO = tempO.*divTemp .- 1;
 	indArray = find(tempO);
+  %If the beginning isn't included, include it
+  if(indArray(1,1)!= 1)
+    indArray = [1;indArray];
+  endif
+  %If the end isn't included, include it
+  if(indArray(end,1)!= rows(dMatrix))
+    indArray = [indArray;rows(dMatrix)+1];
+  endif
+  
+  %Initializes accumulation array
 	divHours = cell(rows(indArray) - 1,2);
 	for count = 1:rows(indArray)-1
-		try
-		divHours{count,1} = O(indArray(count):indArray(count+1),:);
-		divHours{count,2} = floor(O(indArray(count),1)/hourLength);
-		catch
-			indArray(count)
-			fflush(stdout);
-			error('this sucks');
-		end_try_catch
+		divHours{count,1} = dMatrix(indArray(count):indArray(count+1)-1,:);
+		divHours{count,2} = floor(dMatrix(indArray(count),1)/hourLength)+1;
 	endfor
 	
 
 	%Removes cells that have less than hourLength datapoints
-	divRemoved = 0;
-	for count = 1:rows(divHours)
-		if(isnan(divHours{count-divRemoved,1}(:,1)./0) != false(hourLength,1))
-			divHours(count-divRemoved,:) = [];
+  divRemoved = 0;
+  for count = 1:rows(divHours)
+		if (rows(divHours{count - divRemoved,1}) != hourLength)
+			divHours(count - divRemoved,:) = [];
 			divRemoved = divRemoved + 1;
-		else
-			divHours(count-divRemoved,2) = count;
 		endif
 	endfor
-
-
-%	%Sorting into hour length chunks
-%	fullHour = hourLength;
-%	tempO = [O(:,1),O];
-%	tempO(:,1) = tempO(:,1).-1;
-%	tempO(:,1) = mod(tempO(:,1),fullHour);
-%	divHours = cell(0,2);
-%	lastTime = fullHour;
-%	hourCount = 0;
-%	for count = 1:rows(tempO)
-%		if (lastTime > tempO(count,1))
-%			hourCount = hourCount + 1;
-%			divHours{hourCount,2} = hourCount; %Allows recovery of specific time later
-%			divHours{hourCount,1} = O(count,:);
-%		else
-%			divHours{hourCount,1} = [divHours{hourCount,1};O(count,:)];
-%		endif	
-%		lastTime = tempO(count,1);
-%	endfor
-%
-%	divRemoved = 0;
-%	for count = 1:rows(divHours)
-%		if (rows(divHours{count - divRemoved,1}) != fullHour)
-%			divHours(count - divRemoved,:) = [];
-%			divRemoved = divRemoved + 1;
-%		endif
-%	endfor
 
 	%Returns values
 	fullLength = rows(divHours)*hourLength;
@@ -71,12 +50,13 @@ function [rtn,fullLength] = importData(dMatrix,hourLength); %FIX
 endfunction
 	
 %!test
-%! t=1:1e5; t=t';
+%! t=1:1e3; t=t';
 %! fData = [t,randn(rows(t),1)];
-%! [divHours,fullLength] = importData(fData,4096);
+%! [divHours,fullLength] = importData(fData,100);
 %! fullTimeSeries = [];
 %! for count = 1:rows(divHours)
 %!	fullTimeSeries = [fullTimeSeries;divHours{count,1}];
 %! endfor
 %! assert(fData(1:rows(fullTimeSeries),:),fullTimeSeries);
+%! assert(cell2mat(divHours(:,2)),(1:10)');
 

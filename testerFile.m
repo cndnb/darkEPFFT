@@ -8,18 +8,18 @@
 %torque = kappa*theta + rotI*(d^2 theta/dt^2)
 
 %Pendulum and balance parameters, in SI units:
-global I = 378/(1e7);                                                                    
-global f0 = 1.9338e-3; %Fake data f0
+I = 378/(1e7);                                                                    
+f0 = 1.9338e-3; %Fake data f0
 %global f0 = 0.0019295; %Real data f0
-global Q = 500000;                                                                     
-global Temp = 273+24;  
-global kappa = (2*pi*f0)^2 * I;
+Q = 500000;                                                                     
+Temp = 273+24;  
+kappa = (2*pi*f0)^2 * I;
 
 %Sidereal day frequency
-global omegaEarth = 2*pi*(1/86164.0916);
+omegaEarth = 2*pi*(1/86164.0916);
 
 %Solar day frequency
-global oED = 2*pi*(1/86400);
+oED = 2*pi*(1/86400);
 
 %Specific pendulum position data
 %%Latitude, longitude, and compass direction to be input as decimal degrees
@@ -33,7 +33,7 @@ degCompassDir = 30;
 %%At the time Mar 20 2000 07:35 UT
 %%80*24*3600 + 7*3600 + 35*60 = 6939300 seconds since January 1, 2000 00:00:00 UTC
 %%At the vernal equinox, longitude is equal to zero, so z=0;
-global vernalEqLong = 68.1166667;
+vernalEqLong = 68.1166667;
 %
 %%Prepares seattleLat in terms of equatorial cordinates at January 1, 2000 00:00:00 UTC
 %%This is the angle of seattleLat from the X vector
@@ -127,3 +127,11 @@ loglog(freqArray,pwr);
 title('Z comp Power');
 xlabel('Frequency (Hz)');
 ylabel('Torque Power');
+
+%!test
+%! disp('preCalcComponents');
+%! test preCalcComponents
+%! disp('importData');
+%! test importData
+%! disp('importXCov');
+%! test importXCov
