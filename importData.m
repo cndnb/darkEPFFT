@@ -1,4 +1,4 @@
-function [rtn,fullLength] = importData(dMatrix,hourLength); %FIX
+function [rtn,fullLength,indArray] = importData(dMatrix,hourLength); %FIX
 	if(nargin != 2)
 		error('importData - [divHours,fullLength] = importData(dMatrix,hourLength)');
 	endif
@@ -9,7 +9,7 @@ function [rtn,fullLength] = importData(dMatrix,hourLength); %FIX
 	%Subtracts one so that first time point is zero
 	tempO = O(:,1).-1;
 	%Makes it so that every hour starts with a zero in tempO
-	tempO = mod(tempO,hourLength-1);
+	tempO = mod(tempO,hourLength);
 	%Switches to looking at difference between n and n+1 times, so if a day passes but there
 	%is no zero the difference will be negative
 	tempO(2:end) = tempO(2:end) - tempO(1:end-1);
@@ -25,9 +25,9 @@ function [rtn,fullLength] = importData(dMatrix,hourLength); %FIX
 	%Runs through index array values
 	for count = 1:rows(indArray)-1
 		%Assigns first column to be the hourLength matrix of data size = (<=hourLength,2)
-		divHours{count,1} = O(indArray(count):indArray(count+1),:);
+		divHours{count,1} = O(indArray(count):indArray(count+1)-1,:);
 		%Assigns time in hours from the first cut to the second column of the cell
-		divHours{count,2} = floor(O(indArray(count),1)/hourLength);
+		divHours{count,2} = floor(O(indArray(count),1)/hourLength)+1;
 	endfor
 	
 
@@ -46,12 +46,13 @@ function [rtn,fullLength] = importData(dMatrix,hourLength); %FIX
 endfunction
 	
 %!test
-%! t=1:1e5; t=t';
+%! t=1:1e3; t=t';
 %! fData = [t,randn(rows(t),1)];
-%! [divHours,fullLength] = importData(fData,4096);
+%! [divHours,fullLength] = importData(fData,100);
 %! fullTimeSeries = [];
 %! for count = 1:rows(divHours)
 %!	fullTimeSeries = [fullTimeSeries;divHours{count,1}];
 %! endfor
 %! assert(fData(1:rows(fullTimeSeries),:),fullTimeSeries);
+%! assert(cell2mat(divHours(:,2)),(1:rows(divHours))');
 
