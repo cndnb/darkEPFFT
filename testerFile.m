@@ -89,19 +89,20 @@ ZX = Z*X';
 disp('done');
 fflush(stdout);
 
-fakeSignal = exp((2*pi*i*freqVal(5)*hourLength).*tH);
-
+%Collects frequencies from the first FFT fit
 shortFreqArray = A(:,1);
+
+%Removes the frequency column and transposes the matrices so that they have hours
+%running along the rows
 tA = A(:,2:end)';
 tB = B(:,2:end)';
 
-%This type of fake signal changes the power of the entire bin
-%tA(:,2) = tA(:,2).*real(fakeSignal);
-%tB(:,2) = tB(:,2).*imag(fakeSignal);
-
-
+%Combining the sin and cos data so that hours are still along the rows but
+%halfway the data switches from sin to cos components
 Y = zeros(2*rows(tA),columns(tA));
 Y = [tA;tB];
+%Replicates the data along the rows so that the fit for each intermediate frequency
+%is simultaneous.
 Y = repmat(Y,numBlocks,1);
 
 %Fitting using precomputed design matrix to find variations in A,B over time

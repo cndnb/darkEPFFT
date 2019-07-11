@@ -6,64 +6,39 @@ function [rtn,fullLength] = importData(dMatrix,hourLength); %FIX
 	%Choosing data
 	O = dMatrix;
 
+	%Subtracts one so that first time point is zero
 	tempO = O(:,1).-1;
-	tempO = mod(tempO,hourLength);
+	%Makes it so that every hour starts with a zero in tempO
+	tempO = mod(tempO,hourLength-1);
+	%Switches to looking at difference between n and n+1 times, so if a day passes but there
+	%is no zero the difference will be negative
 	tempO(2:end) = tempO(2:end) - tempO(1:end-1);
+	%this makes it so that there are no infinities in the array
 	divTemp = 1./tempO; infInd = isinf(divTemp);
-	divTemp(infInd) = zeros(rows(infInd),1); 
+	divTemp(find(infInd)) = -1.*ones(rows(find(infInd)),1); 
+	%This separates each cell array by finding zeros
 	tempO = tempO.*abs(1./tempO) .- 1;
+	%Indexing array that separates the intended days
 	indArray = find(tempO);
+	%Initializes accumulation array
 	divHours = cell(rows(indArray) - 1,2);
+	%Runs through index array values
 	for count = 1:rows(indArray)-1
-		try
+		%Assigns first column to be the hourLength matrix of data size = (<=hourLength,2)
 		divHours{count,1} = O(indArray(count):indArray(count+1),:);
+		%Assigns time in hours from the first cut to the second column of the cell
 		divHours{count,2} = floor(O(indArray(count),1)/hourLength);
-		catch
-			indArray(count)
-			fflush(stdout);
-			error('this sucks');
-		end_try_catch
 	endfor
 	
 
-	%Removes cells that have less than hourLength datapoints
+	%Removes cells that have less than hourLength datapoints--less noise in FFT data
 	divRemoved = 0;
 	for count = 1:rows(divHours)
-		if(isnan(divHours{count-divRemoved,1}(:,1)./0) != false(hourLength,1))
+		if(rows(divHours{count-divRemoved,1}(:,1)) != hourLength)
 			divHours(count-divRemoved,:) = [];
 			divRemoved = divRemoved + 1;
-		else
-			divHours(count-divRemoved,2) = count;
 		endif
 	endfor
-
-
-%	%Sorting into hour length chunks
-%	fullHour = hourLength;
-%	tempO = [O(:,1),O];
-%	tempO(:,1) = tempO(:,1).-1;
-%	tempO(:,1) = mod(tempO(:,1),fullHour);
-%	divHours = cell(0,2);
-%	lastTime = fullHour;
-%	hourCount = 0;
-%	for count = 1:rows(tempO)
-%		if (lastTime > tempO(count,1))
-%			hourCount = hourCount + 1;
-%			divHours{hourCount,2} = hourCount; %Allows recovery of specific time later
-%			divHours{hourCount,1} = O(count,:);
-%		else
-%			divHours{hourCount,1} = [divHours{hourCount,1};O(count,:)];
-%		endif	
-%		lastTime = tempO(count,1);
-%	endfor
-%
-%	divRemoved = 0;
-%	for count = 1:rows(divHours)
-%		if (rows(divHours{count - divRemoved,1}) != fullHour)
-%			divHours(count - divRemoved,:) = [];
-%			divRemoved = divRemoved + 1;
-%		endif
-%	endfor
 
 	%Returns values
 	fullLength = rows(divHours)*hourLength;

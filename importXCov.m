@@ -25,14 +25,17 @@ function [Z,X,freqVal,numBlocks] = importXCov(numHours,fullLength,tH,hourLength)
 	colSel = [1,1,0,0,0,0,0,0,0,0];
   %Multiplies hours by length of hour to match frequencies (they are 1/seconds)
 	timeH = hourLength.*tH;
+  %Creates direction constants to account for longitude and latitude of the pendulum on earth
+	cM = ones(rows(tH),3);
+	%cM = preCalcComponents(tH.*hourLength,seattleLat,seattleLong,compassDir,startTime);
 	for count = 1:numBlocks
 		if(freqVal(count,1) == 0)
 			X(((count-1)*(2*numHours)+1):(count*(2*numHours)),((count-1)*designColumns+1):(count*designColumns)) = ...
       [ones(numHours,1),zeros(numHours,1);zeros(numHours,1),ones(numHours,1)];
 		else
 			X(((count-1)*(2*numHours)+1):(count*(2*numHours)),((count-1)*designColumns+1):(count*designColumns)) = ...
-      signMat.*[createSineComponents(timeH,freqVec(count,1),ones(numHours,3),colSel);...
-      fliplr(createSineComponents(timeH,freqVec(count,1),ones(numHours,3),colSel))];
+      signMat.*[createSineComponents(timeH,freqVec(count,1),cM,colSel);...
+      fliplr(createSineComponents(timeH,freqVec(count,1),cM,colSel))];
 		endif
 	endfor
 
