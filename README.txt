@@ -1,3 +1,9 @@
+TO RUN THIS PROGRAM:
+
+Open testerFile.m, load data so that it is in the matrix d, and run testerFile in octave.
+Make sure that hourLength is the correct value, and that you have added the correct transfer functions
+in the convertToPower function.
+
 IMPORTING DATA:
 
 Loads the data, puts it into the array d. Immediately converts the angle data into torque data

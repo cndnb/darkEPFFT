@@ -47,9 +47,8 @@ compassDir = (pi/180)*degCompassDir;
 hourLength = 4096;
 
 %importing data
-%d = load('fakeDarkEPAugust92017.dat');
+d = load('fakeDarkEPAugust92017.dat');
 
-d = fData;
 %d = torsionFilter(fData(:,1),fData(:,2),1/f0);
 d(:,2) = d(:,2) - mean(d(:,2));
 
